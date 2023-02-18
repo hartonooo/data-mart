@@ -1,6 +1,3 @@
-use eight_weeks_sql_challenge;
-
-
 --1. DATA CLEANING
 select *,
 SUBSTRING(week_date,2, CHARINDEX('/', week_date, 1)-2)  as day, 
