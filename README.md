@@ -1,5 +1,5 @@
 # data-mart
-- analyzing supermarket's sales performance after new packaging program launched
+- analyzing supermarket's business performance after new packaging program launched
 - using MS. SQL SERVER STUDIO
 
 SQL project/case study from : https://8weeksqlchallenge.com/case-study-5/
