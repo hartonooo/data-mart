@@ -35,8 +35,19 @@ steps:
     
     
     3. How many total transactions were there for each year in the dataset?
+        
+        <details>    
+            <summary>total transactions for each year</summary>        
+            <pre>
+            select calendar_year, SUM(transactions) as total_trx
+            from clean_weekly_sales
+            group by calendar_year;
+            </pre>
+            <img src="https://github.com/mas-tono/data-mart/blob/main/image/2_3%20total_trx.jpg">
+        </details>
+    
     4. What is the total sales for each region for each month?
-    5. What is the total count of transactions for each platform
+    5. What is the total count of transactions for each platform?
     6. What is the percentage of sales for Retail vs Shopify for each month?
     7. What is the percentage of sales by demographic for each year in the dataset?
     8. Which age_band and demographic values contribute the most to Retail sales?
