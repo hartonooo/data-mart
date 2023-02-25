@@ -10,7 +10,30 @@ steps:
 3. data exploration:
     
     1. What day of the week is used for each week_date value?
+    
+        <details>    
+            <summary>day used</summary>        
+            <pre>
+            select distinct date_full, DAY(date_full) as day_used
+            from clean_weekly_sales
+            order by date_full;
+            </pre>
+            <img src="https://github.com/mas-tono/data-mart/blob/main/image/2.1%20day_used.jpg">
+        </details>
+        
     2. What range of week numbers are missing from the dataset?
+    
+        <details>    
+            <summary>week numbers</summary>        
+            <pre>
+            select distinct week_number
+            from clean_weekly_sales
+            order by week_number;
+            </pre>
+            <img src="https://github.com/mas-tono/data-mart/blob/main/image/2.2%20week_numbers.jpg">
+        </details>
+    
+    
     3. How many total transactions were there for each year in the dataset?
     4. What is the total sales for each region for each month?
     5. What is the total count of transactions for each platform
