@@ -81,15 +81,74 @@ steps:
         <details>    
         <summary>percentage of sales for Retail vs Shopify for each month</summary>        
         <pre>
-        
+        with satu as (select calendar_year, month_number, platform, sum(CAST(sales as bigint)) as total_sales
+        from clean_weekly_sales
+        group by calendar_year, month_number, platform
+        ), 
+        </br>
+        dua as (select *, 
+        SUM(total_sales) over(partition by calendar_year) as total_sales_all, 
+        round(total_sales * 100.0 / SUM(total_sales) over(partition by calendar_year, month_number), 2) as pct_sales_per_month
+        from satu)
+        </br>
+        select *
+        from (select calendar_year, platform, month_number, pct_sales_per_month from dua) s
+        pivot (
+            max(pct_sales_per_month)
+            for calendar_year in ([2018], [2019], [2020])
+        ) pvt        
         </pre>
-        <img src="">
+        <img src="https://github.com/mas-tono/data-mart/blob/main/image/2.6%20percentage%20of%20sales%20for%20Retail%20vs%20Shopify%20for%20each%20month.jpg">
+        </details>
+        
+    7. What is the percentage of sales by demographic for each year in the dataset?
+        <details>    
+        <summary>percentage of sales by demographic for each year</summary>        
+        <pre>
+        with satu as (select calendar_year, demographic, sum(CAST(sales as bigint)) as total_sales
+        from clean_weekly_sales
+        group by calendar_year, demographic),
+        </br>
+        dua as (select *, SUM(total_sales) over(partition by calendar_year) as total_sales_all,
+        round(total_sales * 100.0 / SUM(total_sales) over(partition by calendar_year), 2) as pct_demographic_per_year
+        from satu)
+        </br>        
+        select *
+        from (select demographic, calendar_year, pct_demographic_per_year from dua) s
+        pivot(
+            max(pct_demographic_per_year)
+            for calendar_year in ([2018], [2019], [2020])
+        ) pvt
+        </pre>
+        <img src="https://github.com/mas-tono/data-mart/blob/main/image/2.7%20percentage%20of%20sales%20by%20demographic%20for%20each%20year.jpg">
         </details>
     
-    
-    7. What is the percentage of sales by demographic for each year in the dataset?
     8. Which age_band and demographic values contribute the most to Retail sales?
+        <details>    
+        <summary>age_band and demographic values contribute the most to Retail sales</summary> 
+        <p>retirees-families and retirees-couples</p>
+        <pre>
+        select platform, age_band, demographic, sum(CAST(sales as bigint)) as total_sales, RANK() over(order by sum(CAST(sales as bigint)) desc) as ranking
+        from clean_weekly_sales
+        where platform = '''Retail''' and age_band <> 'unknown'
+        group by platform, age_band, demographic;
+        </pre>
+        <img src="https://github.com/mas-tono/data-mart/blob/main/image/2.8%20age_band%20and%20demographic%20values%20contribute%20the%20most%20to%20Retail%20sales.jpg">
+        </details>
+    
+      
     9. Can we use the avg_transaction column to find the average transaction size for each year for Retail vs Shopify? If not - how would you calculate it instead?
+        <details>    
+        <summary>average transaction size for each year for Retail vs Shopify</summary> 
+        <pre>
+        select calendar_year, platform, avg(CAST(sales as bigint)) as avg_trx
+        from clean_weekly_sales
+        group by calendar_year, platform
+        order by calendar_year, platform;        
+        </pre>
+        <img src="https://github.com/mas-tono/data-mart/blob/main/image/2.9%20average%20transaction%20size%20for%20each%20year%20for%20Retail%20vs%20Shopify.jpg">
+        </details>
+
 
 4. analyzing data:
     
