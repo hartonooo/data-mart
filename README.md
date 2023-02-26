@@ -63,6 +63,7 @@ steps:
         select distinct week_number
         from clean_weekly_sales
         order by week_number;</pre>
+        <p>none is missing</p>
         <img src="https://github.com/mas-tono/data-mart/blob/main/image/2.2%20week_numbers.jpg">
         </details>
     
