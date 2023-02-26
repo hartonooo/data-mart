@@ -33,7 +33,7 @@ from clean_weekly_sales
 --2. DATA EXPLORATION
 
 --1. What day of the week is used for each week_date value?
-select distinct date_full, DAY(date_full) as day_used
+select distinct date_full, DAY(date_full) as day_used, DATENAME(weekday, date_full) as day_name
 from clean_weekly_sales
 order by date_full;
 
