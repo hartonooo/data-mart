@@ -6,12 +6,44 @@ SQL project/case study from : https://8weeksqlchallenge.com/case-study-5/
 
 steps:
 1. import data_mart_weekly_sales.csv into SQL SERVER
-2. data cleaning
+2. data cleaning -> create new table: clean_weekly_sales
+        </br>
+        <details>
+        <summary>clean_weekly_sales</summary>
+        <pre>
+        select *,
+        SUBSTRING(week_date,2, CHARINDEX('/', week_date, 1)-2)  as day, 
+        SUBSTRING(week_date, CHARINDEX('/', week_date, 1)+1, 1) as month_number,
+        concat('20', SUBSTRING(week_date, CHARINDEX('/', week_date, CHARINDEX('/', week_date)+1)+1, 2)) as calendar_year,
+        DATEFROMPARTS(concat('20', SUBSTRING(week_date, CHARINDEX('/', week_date, CHARINDEX('/', week_date)+1)+1, 2)),
+                        SUBSTRING(week_date, CHARINDEX('/', week_date, 1)+1, 1),
+                        SUBSTRING(week_date,2, CHARINDEX('/', week_date, 1)-2)) as date_full,
+        case
+            when SUBSTRING(week_date,2, CHARINDEX('/', week_date, 1)-2) between 1 and 7 then 1
+            when SUBSTRING(week_date,2, CHARINDEX('/', week_date, 1)-2) between 8 and 14 then 2
+            when SUBSTRING(week_date,2, CHARINDEX('/', week_date, 1)-2) between 15 and 21 then 3
+            else 4
+        end as week_number,
+        case 
+            when SUBSTRING(segment, 2, 1) = 'C' then 'Couples'
+            when SUBSTRING(segment, 2, 1) = 'F' then 'Families'
+            else 'unknown'
+        end as demographic,
+        case
+            when SUBSTRING(segment, 3, 1) = '1' then 'Young Adults'
+            when SUBSTRING(segment, 3, 1) = '2' then 'Middle Aged'
+            when SUBSTRING(segment, 3, 1) = '3' or SUBSTRING(segment, 3, 1) = '4' then 'Retirees'
+            else 'unknown'
+        end as age_band, 
+        round(sales*100.0/transactions, 2) as avg_transaction
+        into clean_weekly_sales
+        from data_mart_weekly_sales;
+        </pre>
+        </details>
+
 3. data exploration:
     
-    1. What day of the week is used for each week_date value?
-        
-        
+    1. What day of the week is used for each week_date value?      
         <details>
         <summary>day_used</summary>            
         <pre>
