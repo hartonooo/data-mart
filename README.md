@@ -11,7 +11,7 @@ steps:
         <details>
         <summary>clean_weekly_sales</summary>
         <pre>
-        select *,
+        select region, platform, segment, customer_type, transactions, sales,
         SUBSTRING(week_date,2, CHARINDEX('/', week_date, 1)-2)  as day, 
         SUBSTRING(week_date, CHARINDEX('/', week_date, 1)+1, 1) as month_number,
         concat('20', SUBSTRING(week_date, CHARINDEX('/', week_date, CHARINDEX('/', week_date)+1)+1, 2)) as calendar_year,
@@ -39,6 +39,7 @@ steps:
         into clean_weekly_sales
         from data_mart_weekly_sales;
         </pre>
+        <img src="https://github.com/mas-tono/data-mart/blob/main/image/1.%20clean_weekly_sales.jpg">
         </details>
 
 3. data exploration:
@@ -185,13 +186,163 @@ steps:
 4. analyzing data:
     
     1. What is the total sales for the 4 weeks before and after 2020-06-15? What is the growth or reduction rate in actual values and percentage of sales?
+        <details>    
+        <summary>total sales for the 4 weeks before and after 2020-06-15</summary> 
+        <pre>
+        with satu as (select *,
+        case
+        when date_full >= '2020-06-15' then 'after' else 'before'
+        end as new_packaging_date
+        from clean_weekly_sales),</br>
+        
+        total_sales_4_weeks_before as(
+        select sum(CAST(sales as bigint)) as total_sales_before
+        from satu
+        where date_full between DATEADD(week, -4, '2020-06-15') and '2020-06-15'),</br>
+        
+        total_sales_4_weeks_after as(
+        select sum(CAST(sales as bigint)) as total_sales_after
+        from satu
+        where date_full between '2020-06-15' and DATEADD(week, 4, '2020-06-15'))</br>
+        
+        select *,
+        case
+        when total_sales_4_weeks_before.total_sales_before > total_sales_4_weeks_after.total_sales_after then 'before is more trx' else 'after is more trx'
+        end as status,
+        total_sales_4_weeks_before.total_sales_before - total_sales_4_weeks_after.total_sales_after as diff
+        from total_sales_4_weeks_before, total_sales_4_weeks_after;   
+        </pre></br>
+        <p>more trx before new program launched, in timeline 4 weeks before and 4 weeks after</p>
+        <p>the difference: 10.973.134</p>
+        <img src="https://github.com/mas-tono/data-mart/blob/main/image/3.1%20total%20sales%20for%20the%204%20weeks%20before%20and%20after%202020-06-15.jpg">
+        </details>
+
+    
     2. What about the entire 12 weeks before and after?
+        <details>    
+        <summary>total sales for the 12 weeks before and after 2020-06-15</summary> 
+        <pre>
+        with satu as (select *,
+        case
+        when date_full >= '2020-06-15' then 'after' else 'before'
+        end as new_packaging_date
+        from clean_weekly_sales),
+
+        total_sales_12_weeks_before as(
+        select sum(CAST(sales as bigint)) as total_sales_before
+        from satu
+        where date_full between DATEADD(week, -12, '2020-06-15') and '2020-06-15'),
+
+
+        total_sales_12_weeks_after as(
+        select sum(CAST(sales as bigint)) as total_sales_after
+        from satu
+        where date_full between '2020-06-15' and DATEADD(week, 12, '2020-06-15'))
+
+        select *,	
+        case
+        when total_sales_12_weeks_before.total_sales_before > total_sales_12_weeks_after.total_sales_after then 'before is more trx' else 'after is more trx'
+        end as status,
+        total_sales_12_weeks_before.total_sales_before - total_sales_12_weeks_after.total_sales_after as diff
+        from total_sales_12_weeks_before, total_sales_12_weeks_after      
+        </pre></br>
+        <p>more trx before new program launched, in timeline 12 weeks before and 12 weeks after</p>
+        <p>the difference got more bigger for 'before' status: 722.350.742</p>
+        <img src="https://github.com/mas-tono/data-mart/blob/main/image/3.2%20total%20sales%20for%20the%2012%20weeks%20before%20and%20after%202020-06-15.jpg">
+        </details>
+    
+    
     3. How do the sale metrics for these 2 periods before and after compare with the previous years in 2018 and 2019?
+        <details>    
+        <summary>compare with the previous years in 2018 and 2019</summary> 
+        <pre>
+        select calendar_year, sum(CAST(sales as bigint)) as total_sales
+        from clean_weekly_sales
+        where calendar_year in (2018, 2019)
+        group by calendar_year;     
+        </pre></br>
+        <p>with total_sales before new program:</p>
+        
+                - 2018 around 13 million
+                - 2019 around 14 million
+                - 4 weeks before and
+                - 12 weeks before
+                
+        <p>all show bigger total_sales compared to total_sales after new program launched</p>
+        
+        <img src="https://github.com/mas-tono/data-mart/blob/main/image/3.3%20compare%20with%20the%20previous%20years%20in%202018%20and%202019.jpg">
+        </details>
+
+
 
 5. more question:
     Which areas of the business have the highest negative impact in sales metrics performance in 2020 for the 12 week before and after period?
       1. region
+        <details>    
+        <summary>region with highest negative impact</summary> 
+        <pre>
+        with satu as (select *,
+        case
+        when date_full >= '2020-06-15' then 'after' else 'before'
+        end as new_packaging_date
+        from clean_weekly_sales),</br>
+        total_sales_12_weeks_before as(
+        select region, sum(CAST(sales as bigint)) as total_sales_before
+        from satu
+        where date_full between DATEADD(week, -12, '2020-06-15') and '2020-06-15'
+        group by region),</br>
+        total_sales_12_weeks_after as(
+        select region, sum(CAST(sales as bigint)) as total_sales_after
+        from satu
+        where date_full between '2020-06-15' and DATEADD(week, 12, '2020-06-15')
+        group by region)</br>
+        select b.region, 
+                b. total_sales_before, 
+                a.total_sales_after,
+                (b.total_sales_before - a.total_sales_after) as diff,
+                round((b.total_sales_before - a.total_sales_after) *100.0 / b. total_sales_before, 2) as pct_impact
+                from total_sales_12_weeks_before b
+                join total_sales_12_weeks_after a
+                on b.region = a.region
+                order by (b.total_sales_before - a.total_sales_after) *100.0 / b. total_sales_before desc;         
+        </pre></br>
+        <p>the region with highest negative impact is asia</p>
+        <img src="https://github.com/mas-tono/data-mart/blob/main/image/4.1%20region%20negative%20impact.jpg">
+        </details>      
+      
       2. platform
+        <details>    
+        <summary>region with highest negative impact</summary> 
+        <pre>
+        with satu as (select *,
+        case
+        when date_full >= '2020-06-15' then 'after' else 'before'
+        end as new_packaging_date
+        from clean_weekly_sales),</br>
+        total_sales_12_weeks_before as(
+        select platform, sum(CAST(sales as bigint)) as total_sales_before
+        from satu
+        where date_full between DATEADD(week, -12, '2020-06-15') and '2020-06-15'
+        group by platform),</br>
+        total_sales_12_weeks_after as(
+        select platform, sum(CAST(sales as bigint)) as total_sales_after
+        from satu
+        where date_full between '2020-06-15' and DATEADD(week, 12, '2020-06-15')
+        group by platform)</br>
+        select b.platform, 
+                b. total_sales_before, 
+                a.total_sales_after,
+                (b.total_sales_before - a.total_sales_after) as diff,
+                round((b.total_sales_before - a.total_sales_after) *100.0/ b. total_sales_before, 2) as pct_impact
+        from total_sales_12_weeks_before b
+        join total_sales_12_weeks_after a
+        on b.platform = a.platform
+        order by round((b.total_sales_before - a.total_sales_after) *100.0/ b. total_sales_before, 2) desc;         
+        </pre></br>
+        <p>the platform with highest negative impact is retail</p>
+        <img src="https://github.com/mas-tono/data-mart/blob/main/image/4.2%20platform%20negative%20impact.jpg">
+        </details>    
+                     
       3. age_band
       4. demographic
       5. customer_type
