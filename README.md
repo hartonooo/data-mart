@@ -312,7 +312,7 @@ steps:
       
       2. platform
         <details>    
-        <summary>region with highest negative impact</summary> 
+        <summary>platform with highest negative impact</summary> 
         <pre>
         with satu as (select *,
         case
@@ -344,6 +344,112 @@ steps:
         </details>    
                      
       3. age_band
+        <details>    
+        <summary>age_band with highest negative impact</summary> 
+        <pre>
+        with satu as (select *,
+        case
+        when date_full >= '2020-06-15' then 'after' else 'before'
+        end as new_packaging_date
+        from clean_weekly_sales),</br>
+        total_sales_12_weeks_before as(
+        select age_band, sum(CAST(sales as bigint)) as total_sales_before
+        from satu
+        where date_full between DATEADD(week, -12, '2020-06-15') and '2020-06-15'
+        group by age_band),</br>
+        total_sales_12_weeks_after as(
+        select age_band, sum(CAST(sales as bigint)) as total_sales_after
+        from satu
+        where date_full between '2020-06-15' and DATEADD(week, 12, '2020-06-15')
+        group by age_band)</br>
+        select b.age_band, 
+                b. total_sales_before, 
+                a.total_sales_after,
+                (b.total_sales_before - a.total_sales_after) as diff,
+                round((b.total_sales_before - a.total_sales_after) *100.0/ b. total_sales_before, 2) as pct_impact
+        from total_sales_12_weeks_before b
+        join total_sales_12_weeks_after a
+        on b.age_band = a.age_band
+        where b.age_band <> 'unknown'
+        order by round((b.total_sales_before - a.total_sales_after) *100.0/ b. total_sales_before, 2) desc;         
+        </pre></br>
+        <p>the age_band with highest negative impact is middle aged</p>
+        <img src="https://github.com/mas-tono/data-mart/blob/main/image/4.3%20age_band%20negative%20impact.jpg">
+        </details>    
+      
+      
       4. demographic
+        <details>    
+        <summary>demographic with highest negative impact</summary> 
+        <pre>
+        with satu as (select *,
+        case
+        when date_full >= '2020-06-15' then 'after' else 'before'
+        end as new_packaging_date
+        from clean_weekly_sales),</br>
+        total_sales_12_weeks_before as(
+        select demographic, sum(CAST(sales as bigint)) as total_sales_before
+        from satu
+        where date_full between DATEADD(week, -12, '2020-06-15') and '2020-06-15'
+        group by demographic),</br>
+        total_sales_12_weeks_after as(
+        select demographic, sum(CAST(sales as bigint)) as total_sales_after
+        from satu
+        where date_full between '2020-06-15' and DATEADD(week, 12, '2020-06-15')
+        group by demographic)</br>
+        select b.demographic, 
+                b. total_sales_before, 
+                a.total_sales_after,
+                (b.total_sales_before - a.total_sales_after) as diff,
+                round((b.total_sales_before - a.total_sales_after) *100.0/ b. total_sales_before, 2) as pct_impact
+        from total_sales_12_weeks_before b
+        join total_sales_12_weeks_after a
+        on b.demographic = a.demographic
+        where b.demographic <> 'unknown'
+        order by round((b.total_sales_before - a.total_sales_after) *100.0/ b. total_sales_before, 2) desc;       
+        </pre></br>
+        <p>the demographic with highest negative impact is families</p>
+        <img src="https://github.com/mas-tono/data-mart/blob/main/image/4.4%20demographic%20negative%20impact.jpg">
+        </details>    
+      
+      
+      
       5. customer_type
+        <details>    
+        <summary>customer type with highest negative impact</summary> 
+        <pre>
+        with satu as (select *,
+        case
+        when date_full >= '2020-06-15' then 'after' else 'before'
+        end as new_packaging_date
+        from clean_weekly_sales),</br>
+        total_sales_12_weeks_before as(
+        select customer_type, sum(CAST(sales as bigint)) as total_sales_before
+        from satu
+        where date_full between DATEADD(week, -12, '2020-06-15') and '2020-06-15'
+        group by customer_type),</br>
+        total_sales_12_weeks_after as(
+        select customer_type, sum(CAST(sales as bigint)) as total_sales_after
+        from satu
+        where date_full between '2020-06-15' and DATEADD(week, 12, '2020-06-15')
+        group by customer_type)</br>
+        select b.customer_type, 
+                        b. total_sales_before, 
+                        a.total_sales_after,
+                        (b.total_sales_before - a.total_sales_after) as diff,
+                        round((b.total_sales_before - a.total_sales_after) *100.0/ b. total_sales_before, 2) as pct_impact
+        from total_sales_12_weeks_before b
+        join total_sales_12_weeks_after a
+        on b.customer_type = a.customer_type
+        order by round((b.total_sales_before - a.total_sales_after) *100.0/ b. total_sales_before, 2) desc;             
+        </pre></br>
+        <p>the customer type with highest negative impact is guest</p>
+        <img src="https://github.com/mas-tono/data-mart/blob/main/image/4.5%20customer%20type%20negative%20impact.jpg">
+        </details>    
+
+
+
+
+
+
 
