@@ -51,7 +51,7 @@ steps:
         select distinct date_full, DAY(date_full) as day_used, DATENAME(weekday, date_full) as day_name
         from clean_weekly_sales
         order by date_full;</pre>
-        <p>Monday</p>
+        <p>Monday</p> 
         <img src="https://github.com/mas-tono/data-mart/blob/main/image/2.1%20day_used.jpg">
         </details>
         
